@@ -39,6 +39,15 @@ class LeafNode(HTMLNode):
             return self.value
         return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, LeafNode):
+            return NotImplemented
+        return (
+            self.tag == other.tag
+            and self.value == other.value
+            and self.props == other.props
+        )
+
     def __repr__(self) -> str:
         return f"LeafNode(tag={self.tag!r}, value={self.value!r}, props={self.props!r})"
 
