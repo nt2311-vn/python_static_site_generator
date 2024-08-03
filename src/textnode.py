@@ -1,5 +1,8 @@
+from typing import Optional
+
+
 class TextNode:
-    def __init__(self, text: str, text_type: str, url: str | None = None):
+    def __init__(self, text: str, text_type: str, url: Optional[str] = None):
         self.text = text
         self.text_type = text_type
         self.url = url
