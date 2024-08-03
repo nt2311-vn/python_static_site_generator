@@ -2,73 +2,55 @@ from typing import List, Dict, Optional
 
 
 class HTMLNode:
-    def __init__(
-        self,
-        tag: Optional[str] = None,
-        value: Optional[str] = None,
-        children: Optional[List["HTMLNode"]] = None,
-        props: Optional[Dict[str, str]] = None,
-    ):
+    def __init__(self, tag=None, value=None, children=None, props=None):
         self.tag = tag
         self.value = value
-        self.children = children if children is not None else []
-        self.props = props if props is not None else {}
+        self.children = children
+        self.props = props
 
-    def to_html(self) -> str:
-        raise NotImplementedError("This method should be implemented by subclasses")
+    def to_html(self):
+        raise NotImplementedError("to_html method not implemented")
 
-    def props_to_html(self) -> str:
-        if not self.props:
+    def props_to_html(self):
+        if self.props is None:
             return ""
-        return " " + " ".join(f'{key}="{value}"' for key, value in self.props.items())
+        props_html = ""
+        for prop in self.props:
+            props_html += f' {prop}="{self.props[prop]}"'
+        return props_html
 
-    def __repr__(self) -> str:
-        return f"HTMLNode(tag={self.tag!r}, value={self.value!r}, children={self.children!r}, props={self.props!r})"
+    def __repr__(self):
+        return f"HTMLNode({self.tag}, {self.value}, children: {self.children}, {self.props})"
 
 
 class LeafNode(HTMLNode):
-    def __init__(
-        self, tag: Optional[str], value: str, props: Optional[Dict[str, str]] = None
-    ):
-        super().__init__(tag=tag, value=value, children=None, props=props)
+    def __init__(self, tag, value, props=None):
+        super().__init__(tag, value, None, props)
 
-    def to_html(self) -> str:
-        if not self.value:
-            raise ValueError("LeafNode must have a value")
+    def to_html(self):
+        if self.value is None:
+            raise ValueError("Invalid HTML: no value")
         if self.tag is None:
             return self.value
         return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
 
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, LeafNode):
-            return NotImplemented
-        return (
-            self.tag == other.tag
-            and self.value == other.value
-            and self.props == other.props
-        )
-
-    def __repr__(self) -> str:
-        return f"LeafNode(tag={self.tag!r}, value={self.value!r}, props={self.props!r})"
+    def __repr__(self):
+        return f"LeafNode({self.tag}, {self.value}, {self.props})"
 
 
 class ParentNode(HTMLNode):
-    def __init__(
-        self, tag: str, children: List[HTMLNode], props: Optional[Dict[str, str]] = None
-    ):
-        if not tag:
-            raise ValueError("ParentNode must have a tag")
-        if not children:
-            raise ValueError("ParentNode must have children")
-        super().__init__(tag=tag, value=None, children=children, props=props)
+    def __init__(self, tag, children, props=None):
+        super().__init__(tag, None, children, props)
 
-    def to_html(self) -> str:
-        if not self.tag:
-            raise ValueError("ParentNode must have a tag")
-        if not self.children:
-            raise ValueError("ParentNode must have children")
-        children_html = "".join(child.to_html() for child in self.children)
+    def to_html(self):
+        if self.tag is None:
+            raise ValueError("Invalid HTML: no tag")
+        if self.children is None:
+            raise ValueError("Invalid HTML: no children")
+        children_html = ""
+        for child in self.children:
+            children_html += child.to_html()
         return f"<{self.tag}{self.props_to_html()}>{children_html}</{self.tag}>"
 
-    def __repr__(self) -> str:
-        return f"ParentNode(tag={self.tag!r}, children={self.children!r}, props={self.props!r})"
+    def __repr__(self):
+        return f"ParentNode({self.tag}, children: {self.children}, {self.props})"
